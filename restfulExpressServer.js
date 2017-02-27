@@ -6,7 +6,28 @@ const path = require('path');
 const petPaths = path.join(__dirname , 'pets.json');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const basicAuth = require('basic-auth');
 
+var auth = function (req, res, next) {
+  function unauthorized(res) {
+    res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+    return res.send(401);
+  };
+
+  var user = basicAuth(req);
+
+  if (!user || !user.name || !user.pass) {
+    return unauthorized(res);
+  };
+
+  if (user.name === 'admin' && user.pass === 'meowmix') {
+    return next();
+  } else {
+    return unauthorized(res);
+  };
+};
+
+app.use(auth);
 app.use(bodyParser.json());
 app.use(morgan('common'));
 
