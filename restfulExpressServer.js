@@ -8,23 +8,30 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const basicAuth = require('basic-auth');
 
-var auth = function (req, res, next) {
+function openFile() {
+  let file = fs.readFileSync('pets.json');
+  let jData = JSON.parse(file);
+  return jData;
+}
+
+const auth = function (req, res, next) {
   function unauthorized(res) {
     res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
     return res.send(401);
-  };
+  }
 
-  var user = basicAuth(req);
+  let user = basicAuth(req);
 
   if (!user || !user.name || !user.pass) {
     return unauthorized(res);
-  };
+  }
 
   if (user.name === 'admin' && user.pass === 'meowmix') {
     return next();
-  } else {
+  }
+  else {
     return unauthorized(res);
-  };
+  }
 };
 
 app.use(auth);
@@ -32,13 +39,11 @@ app.use(bodyParser.json());
 app.use(morgan('common'));
 
 app.get('/pets', (req, res) => {
-  let file = fs.readFileSync(petPaths);
-  let jData = JSON.parse(file);
+  let jData = openFile();
   res.send(jData);
 });
 
 app.get('/pets/:index', (req, res) => {
-  let file = fs.readFileSync(petPaths);
   let jData = JSON.parse(file);
   let condition = true;
   for (let i = 0; i < jData.length; i++) {
@@ -53,8 +58,7 @@ app.get('/pets/:index', (req, res) => {
 });
 
 app.post('/pets', (req, res) => {
-  let file = fs.readFileSync(petPaths);
-  let jData = JSON.parse(file);
+  let jData = openFile();
   let condition = true;
   for (let key in req.body) {
     if (req.body[key] === '') {

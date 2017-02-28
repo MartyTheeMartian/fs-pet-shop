@@ -3,16 +3,22 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const file = fs.readFileSync('pets.json');
-const jData = JSON.parse(file);
+
+function openFile() {
+  let file = fs.readFileSync('pets.json');
+  let jData = JSON.parse(file);
+  return jData;
+}
 
 app.use(bodyParser.json());
 
 app.get('/pets', (req, res) => {
+  let jData = openFile();
   res.send(jData);
 });
 
 app.get('/pets/:index',(req, res) => {
+  let jData = openFile();
   let condition = true;
   for (let i = 0; i < jData.length; i++) {
     if (i.toString() === req.params.index) {
@@ -26,6 +32,7 @@ app.get('/pets/:index',(req, res) => {
 });
 
 app.post('/pets',(req, res) => {
+  let jData = openFile();
   let condition = true;
   for (let key in req.body) {
     if (req.body[key] === '') {
